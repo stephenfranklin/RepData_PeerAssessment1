@@ -1,9 +1,19 @@
 # Reproducible Research: Peer Assessment 1
 
+### set knitr code chunk global options:
+```{r setoptions,echo=TRUE}
+opts_chunks$set(echo=TRUE)
+```
 
 ## Loading and preprocessing the data
-
-
+```{r loading}
+activity <- read.csv(file = unz("activity.zip", "activity.csv"))
+activity$interval<-sprintf("%04d",activity$interval) # fix to 4 characters 
+activity$datetime<-paste(activity$date,activity$interval)
+activity$datetime<-strptime(activity$datetime,"%Y-%m-%d %H%M")
+#View(activity)
+#str(activity)
+```
 
 ## What is mean total number of steps taken per day?
 
