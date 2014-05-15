@@ -15,7 +15,7 @@ activity$interval<-sprintf("%04d",activity$interval) # fix to 4 characters
 activity$datetime<-paste(activity$date,activity$interval)
 activity$datetime<-strptime(activity$datetime,"%Y-%m-%d %H%M")
 #View(activity)
-#str(activity)
+str(activity)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -41,8 +41,10 @@ dt.med
 intervals<-data.frame(tapply(activity$steps,as.factor(activity$interval),mean,na.rm=T))
 names(intervals)<-"avg.steps"
 #View(intervals)
+
 ## make annoying row names into a useful column
 intervals <- cbind(interval = as.numeric(rownames(intervals)), intervals)
+
 qplot(interval, avg.steps, data= intervals, geom = "line")
 ```
 
@@ -65,7 +67,7 @@ count_NAs
 ```{r}
 head(activity$steps)
 ```
-Above we see the NAs.
+Above we see the NAs.  
 Now we'll replace them with the mean.
 ```{r fill_NAs}
 impute <- function(x, fun) {
