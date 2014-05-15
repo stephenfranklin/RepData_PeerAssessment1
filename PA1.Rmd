@@ -2,12 +2,12 @@
 
 ### set knitr code chunk global options:
 ```{r setoptions,echo=TRUE}
-opts_chunks$set(echo=TRUE)
+opts_chunk$set(echo=TRUE)
 library(ggplot2)
 ```
 
 ## Loading and preprocessing the data
-```{r loading}
+```{r loading,cache=TRUE}
 activity <- read.csv(file = unz("activity.zip", "activity.csv"))
 ## combine the date and interval into a datetime column
 activity$interval<-sprintf("%04d",activity$interval) # fix to 4 characters 
@@ -61,33 +61,63 @@ count_NAs
 ```
 
 ### Devise a strategy for filling in all of the missing values in the dataset.
+```{r}
+head(activity$steps)
+```
+Above we see the NAs.
+Now we'll replace them with the mean.
 ```{r fill_NAs}
-library(plyr)
 impute <- function(x, fun) {
   missing <- is.na(x)
   replace(x, missing, fun(x[!missing]))
 }
-ddply(df, ~ group, transform, traits = impute(traits, mean))
-
-interval.index <- function(x) intervals$avg.steps[[
-                        activity$interval[x]]]
-
 act<-activity
 act$steps<-ifelse(is.na(activity$steps),
-                       interval.index(activity$steps),activity$steps)
-act$steps<-ifelse(is.na(activity$steps),
                   impute(activity$steps,mean),activity$steps)
-View(act)
-activity$steps[1]
-um<-intervals$avg.steps[[activity$interval[3]]]
-str(um)
-um
+head(act$steps)
+```
+(I spent a long time trying to replace those NAs with the 5-minute interval mean instead, but I didn't figure it out.)
 
-missing <- is.na(activity$steps)
-head(missing)
+### Create a new dataset that is equal to the original dataset but with the missing data filled in.
+```{r, results='markup'}
+## The new dataset was created in the previous step.
+head(act)
 ```
 
-
-
+### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```{r histogram2}
+daily.totals<-tapply(act$steps,act$date,sum)
+dt.hist <- qplot(daily.totals,binwidth=3000)
+dt.hist
+dt.mean <- mean(daily.totals,na.rm=T)
+dt.med <- median(daily.totals,na.rm=T)
+dt.mean
+dt.med
+```
+Imputing the missing data imputed with the mean made no noticeable difference in the histogram nor the mean; the median is merely one number higher.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+### Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+```{r weekdays}
+is.weekday <- function(dates) {
+    weekday <- vector(mode="logical", length=0)
+    f.days<-factor(weekdays(dates,abbreviate=TRUE))
+    print(cat(head(f.days,10)))
+    weekend<-c("Sat","Sun")
+    for(day in f.days) {
+        if(day %in% weekend) weekday[day] <- "FALSE"
+    else weekday[day] <- "TRUE"
+    }
+    return(weekday)
+}
+act.weekday <- factor(weekdays(act$datetime,abbreviate=T))
+act$is.weekday <- ifelse(act.weekday !="Sat" ||
+                             act.weekday !="Sun", TRUE,FALSE)
+View(act)
+weekend<-c("Sat","Sun")
+weekend != "Sat"
+
+
+
+````
