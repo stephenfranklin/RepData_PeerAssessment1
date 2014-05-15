@@ -67,7 +67,8 @@ count_NAs
 ```{r}
 head(activity$steps)
 ```
-Above we see the NAs.  
+Above we see the NAs.
+
 Now we'll replace them with the mean.
 ```{r fill_NAs}
 impute <- function(x, fun) {
