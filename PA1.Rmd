@@ -34,6 +34,7 @@ dt.med
 ```
 
 ## What is the average daily activity pattern?
+
 ### Make a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days
 ```{r time-series-plot}
 intervals<-data.frame(tapply(activity$steps,as.factor(activity$interval),mean,na.rm=T))
@@ -52,6 +53,40 @@ max_interval
 
 
 ## Imputing missing values
+
+### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r count_NAs}
+count_NAs <- sum(is.na(activity))
+count_NAs
+```
+
+### Devise a strategy for filling in all of the missing values in the dataset.
+```{r fill_NAs}
+library(plyr)
+impute <- function(x, fun) {
+  missing <- is.na(x)
+  replace(x, missing, fun(x[!missing]))
+}
+ddply(df, ~ group, transform, traits = impute(traits, mean))
+
+interval.index <- function(x) intervals$avg.steps[[
+                        activity$interval[x]]]
+
+act<-activity
+act$steps<-ifelse(is.na(activity$steps),
+                       interval.index(activity$steps),activity$steps)
+act$steps<-ifelse(is.na(activity$steps),
+                  impute(activity$steps,mean),activity$steps)
+View(act)
+activity$steps[1]
+um<-intervals$avg.steps[[activity$interval[3]]]
+str(um)
+um
+
+missing <- is.na(activity$steps)
+head(missing)
+```
+
 
 
 
